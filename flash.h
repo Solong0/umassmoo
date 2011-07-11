@@ -3,8 +3,14 @@
 #ifndef FLASH_H
 #define FLASH_H
 
+// pin setup for external flash wired to SPI bus
 #define EXTFLASH_PORT_OUT P5OUT
-#define EXTFLASH_CHIP_ENABLE_PIN 0x01 // pin 1 wired to extflash's CE# pin
+#define EXTFLASH_PORT_DIR P5DIR
+#define EXTFLASH_PORT_SEL P5SEL
+#define EXTFLASH_CHIP_ENABLE_PIN          0x01 // pin 0 wired to flash's CE# pin
+#define EXTFLASH_SPI_DATA_OUT_PIN         0x02 // pin 1 wired to SPI data out
+#define EXTFLASH_SPI_DATA_IN_PIN          0x04 // pin 2 wired to SPI data in
+#define EXTFLASH_SPI_SERIAL_CLOCK_OUT_PIN 0x08 // pin 3 wired to SPI clock
 
 // flash commands
 #define EXTFLASH_BYTE_PROGRAM_COMMAND 0x02
