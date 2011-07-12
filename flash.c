@@ -3,6 +3,8 @@
 #include "moo.h"
 #include "flash.h"
 
+unsigned char spi_iodata;
+
 void extflash_init (void) {
     // set up EXTFLASH_PORT for use with external flash
     EXTFLASH_PORT_OUT |= EXTFLASH_CHIP_ENABLE_PIN;
@@ -38,6 +40,8 @@ void extflash_send_byte (unsigned char c) {
 }
 
 unsigned char extflash_read_uchar (unsigned long addr) {
+    unsigned char i, retval;
+
     extflash_enable_chip();
     extflash_send_byte(EXTFLASH_BYTE_READ_COMMAND);
 
@@ -46,11 +50,14 @@ unsigned char extflash_read_uchar (unsigned long addr) {
     extflash_send_byte((addr & 0xFF00) >> 8);
     extflash_send_byte(addr & 0xFF);
 
-    // now wait for RX via interrupt XXX
+    // sync with the clock and busy-wait for USCIB1RX_ISR to fire
+    extflash_send_byte(0);
+    for (i = 5; i != 0; --i); // interrupt should be called in here
+    retval = spi_iodata;      // and ISR should have placed val in spi_iodata
 
     extflash_disable_chip();
 
-    return 0; // XXX
+    return spi_iodata;
 }
 
 unsigned char extflash_write_uchar (unsigned long addr, unsigned char c) {
@@ -69,4 +76,10 @@ unsigned char extflash_write_uchar (unsigned long addr, unsigned char c) {
 
     extflash_disable_chip();
     return 1; // XXX
+}
+
+#pragma vector=USCIAB1RX_VECTOR
+__interrupt void USCIB1RX_ISR (void) {
+    if (UC1IFG & UCB1RXIFG)
+        spi_iodata = UCB1RXBUF;
 }
