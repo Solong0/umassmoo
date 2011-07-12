@@ -78,6 +78,25 @@ unsigned char extflash_write_uchar (unsigned long addr, unsigned char c) {
     return 1; // XXX
 }
 
+void extflash_erase_segment (unsigned long addr) {
+    unsigned i = 0;
+
+    extflash_enable_chip();
+    extflash_send_byte(EXTFLASH_WRITE_ENABLE_COMMAND);
+
+    extflash_send_byte(EXTFLASH_ERASE_SEGMENT_COMMAND);
+
+    // send three bytes of address, from upper to lower
+    extflash_send_byte((addr & 0xFF0000) >> 16);
+    extflash_send_byte((addr & 0xFF00) >> 8);
+    extflash_send_byte(addr & 0xFF);
+
+    extflash_disable_chip();
+
+    // busy-wait for erase. XXX how much is enough?
+    for (i = 0; i < 7500; ++i);
+}
+
 #pragma vector=USCIAB1RX_VECTOR
 __interrupt void USCIB1RX_ISR (void) {
     if (UC1IFG & UCB1RXIFG)
