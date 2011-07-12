@@ -345,6 +345,15 @@ int main(void)
           // sleep, which puts me back into state_arbitrate. this is complete
           // a violation of the protocol, but it sure does make everything
           // work better. - polly 8/9/2008
+          
+         //Example: Interpreting one of 2 hardcoded commands, C1 or D0
+        if(0xC1 == cmd[5]){
+          rpc_cmd = 0x00;  
+        } else if(0xD0 == cmd[5]){
+          rpc_cmd = 0x01;  
+        }
+        //End example
+          
           handle_query(STATE_REPLY);
           setup_to_receive();
         }
@@ -595,6 +604,8 @@ int main(void)
         rpc_cmd = cmd[5];   // RPC command, indexes into dispatch table
         rpc_param = cmd[6]; // Optional parameter for RPC command
 
+
+        
         if (rpc_in_progress) {
             /* if we reach here, the RPC has finished, so return its response
              * to the reader */
