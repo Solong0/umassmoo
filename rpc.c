@@ -71,6 +71,7 @@ unsigned int rpc_unkill (void) {
 
 unsigned int rpc_get_temperature (void) {
     // XXX copied from (sufficiently tested?) tests/sensorTest.c
+    unsigned int adcval;
 
     // setup ADC for external temperature sensor
     ADC12CTL0 &= ~ENC; // make sure this is off otherwise settings are locked.
@@ -79,9 +80,12 @@ unsigned int rpc_get_temperature (void) {
     ADC12CTL1 = SHP;                                // Use sampling timer
     ADC12MCTL0 = INCH_TEMP_EXT_IN + SREF_1;         // Vr+=Vref+
 
-    ADC12CTL0 |= ENC;     // Enable conversion
-    ADC12CTL0 |= ADC12SC; // Start conversion
+    ADC12CTL0 |= ENC | ADC12SC; // enable and start conversion
+    _BIC_SR(GIE); // disable interrupts while busy-waiting on ADC
     while (ADC12CTL1 & ADC12BUSY); // busy-wait for ADC to sample
+    adcval = ADC12MEM0;
+    ADC12CTL0 = ADC12CTL1 = 0; // turn off ADC
+    _BIS_SR(GIE); // reenable interrupts
 
-    return ADC12MEM0;
+    return adcval;
 }
