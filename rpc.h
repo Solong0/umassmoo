@@ -22,5 +22,6 @@ void rpc_dispatch (void);
 
 unsigned int rpc_beep (void);
 unsigned int rpc_kill (void);
+unsigned int rpc_unkill (void);
 
 #endif // RPC_H

@@ -60,3 +60,7 @@ unsigned int rpc_beep (void) {
 unsigned int rpc_kill (void) {
     return kill();
 };
+
+unsigned int rpc_unkill (void) {
+    return unkill();
+}
