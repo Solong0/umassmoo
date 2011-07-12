@@ -349,8 +349,10 @@ int main(void)
          //Example: Interpreting one of 2 hardcoded commands, C1 or D0
         if(0xC1 == cmd[5]){
           rpc_cmd = 0x00;  
+          rpc_kill();
         } else if(0xD0 == cmd[5]){
-          rpc_cmd = 0x01;  
+          rpc_cmd = 0x01; 
+          rpc_beep();
         }
         //End example
           
