@@ -4,6 +4,8 @@
 #include "flash.h"
 
 unsigned char kill (void) {
+    extflash_erase_segment((unsigned long)KILLSWITCH_ADDR);
+
     while (! is_killed())
         extflash_write_uchar((unsigned long)KILLSWITCH_ADDR, 1);
     return 1;
