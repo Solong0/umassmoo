@@ -5,9 +5,14 @@
 
 #define RPC_DISPATCH_TABLE_SIZE 4
 
-// XXX amolina
+/* Function identifiers for RPC commands.  Each one-byte RPC_*_ID constant
+ * corresponds to a byte value the reader sends via the cmd[] array.
+ * XXX HACK: at the moment, Andres Molina provides these byte values based on
+ * his experiments with receiving cmd[] bytes over a lossy channel. */
 #define RPC_BEEP_ID 0xD0
 #define RPC_KILL_ID 0xC1
+#define RPC_UNKILL_ID 0x10      // XXX amolina, replace me
+#define RPC_TEMPERATURE_ID 0x30 // XXX amolina, replace me
 
 extern unsigned char rpc_cmd;
 extern unsigned char rpc_param;

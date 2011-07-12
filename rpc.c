@@ -17,7 +17,11 @@ void rpc_init (void) {
     rpc_dispatch_table[1].id = RPC_KILL_ID;
     rpc_dispatch_table[1].fn = &rpc_kill;
 
-    // XXX more RPCs
+    rpc_dispatch_table[2].id = RPC_UNKILL_ID;
+    rpc_dispatch_table[2].fn = &rpc_unkill;
+
+    rpc_dispatch_table[3].id = RPC_TEMPERATURE_ID;
+    rpc_dispatch_table[3].fn = &rpc_get_temperature;
 }
 
 void rpc_dispatch (void) {
@@ -63,4 +67,21 @@ unsigned int rpc_kill (void) {
 
 unsigned int rpc_unkill (void) {
     return unkill();
+}
+
+unsigned int rpc_get_temperature (void) {
+    // XXX copied from (sufficiently tested?) tests/sensorTest.c
+
+    // setup ADC for external temperature sensor
+    ADC12CTL0 &= ~ENC; // make sure this is off otherwise settings are locked.
+    P6SEL |= INCH_TEMP_EXT_IN;                      // Enable A/D channel A4
+    ADC12CTL0 = ADC12ON + SHT0_2 + REFON + REF2_5V; // Turn on and set up ADC12
+    ADC12CTL1 = SHP;                                // Use sampling timer
+    ADC12MCTL0 = INCH_TEMP_EXT_IN + SREF_1;         // Vr+=Vref+
+
+    ADC12CTL0 |= ENC;     // Enable conversion
+    ADC12CTL0 |= ADC12SC; // Start conversion
+    while (ADC12CTL1 & ADC12BUSY); // busy-wait for ADC to sample
+
+    return ADC12MEM0;
 }
