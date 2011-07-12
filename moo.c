@@ -345,19 +345,32 @@ int main(void)
           // sleep, which puts me back into state_arbitrate. this is complete
           // a violation of the protocol, but it sure does make everything
           // work better. - polly 8/9/2008
-          
-         //Example: Interpreting one of 2 hardcoded commands, C1 or D0
-        if(0xC1 == cmd[5]){
-          rpc_cmd = 0x00;  
-          rpc_kill();
-        } else if(0xD0 == cmd[5]){
-          rpc_cmd = 0x01; 
-          rpc_beep();
-        }
-        //End example
-          
-          handle_query(STATE_REPLY);
-          setup_to_receive();
+
+            rpc_cmd = cmd[5];   // RPC command, indexes into dispatch table
+            rpc_param = cmd[6]; // Optional parameter for RPC command
+
+            if (rpc_in_progress) {
+                /* if we reach here, the RPC has finished, so return its response
+                 * to the reader */
+                ackReply[4] = rpc_cmd;           // echo back command & param
+                ackReply[5] = rpc_param;         // ^(reader should sanity-check)
+                ackReply[6] = rpc_retval >> 8;   // high byte of rpc_retval
+                ackReply[7] = rpc_retval & 0xFF; // low byte of rpc_retval
+
+                ackReplyCRC = crc16_ccitt(&ackReply[0], 14);
+                ackReply[15] = (unsigned char)ackReplyCRC;
+                ackReply[14] = (unsigned char)__swap_bytes(ackReplyCRC); // XXX
+
+                rpc_in_progress = 0;
+            } else {
+              /* start the RPC; will stomp on protocol participation until it's
+               * done */
+                rpc_in_progress = 1;
+                rpc_dispatch();
+            }
+
+            handle_query(STATE_REPLY);
+            setup_to_receive();
         }
         //////////////////////////////////////////////////////////////////////
         // process the QUERYREP command
@@ -598,34 +611,6 @@ int main(void)
         ackReplyCRC = crc16_ccitt(&ackReply[0], 14);
         ackReply[15] = (unsigned char)ackReplyCRC;
         ackReply[14] = (unsigned char)__swap_bytes(ackReplyCRC);
-        state = STATE_READY;
-        delimiterNotFound = 1; // reset
-#elif SIMPLE_READ_COMMAND
-        RECEIVE_CLOCK;
-
-        rpc_cmd = cmd[5];   // RPC command, indexes into dispatch table
-        rpc_param = cmd[6]; // Optional parameter for RPC command
-
-
-        
-        if (rpc_in_progress) {
-            /* if we reach here, the RPC has finished, so return its response
-             * to the reader */
-            ackReply[4] = rpc_cmd;           // echo back command & param
-            ackReply[5] = rpc_param;         //  ^ (reader should sanity-check)
-            ackReply[6] = rpc_retval >> 8;   // high byte of rpc_retval
-            ackReply[7] = rpc_retval & 0xFF; // low byte of rpc_retval
-
-            ackReplyCRC = crc16_ccitt(&ackReply[0], 14);
-            ackReply[15] = (unsigned char)ackReplyCRC;
-            ackReply[14] = (unsigned char)__swap_bytes(ackReplyCRC); // XXX
-
-            rpc_in_progress = 0;
-        } else {
-            rpc_in_progress = 1;
-            rpc_dispatch();
-        }
-
         state = STATE_READY;
         delimiterNotFound = 1; // reset
 #endif

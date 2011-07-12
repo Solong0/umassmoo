@@ -5,6 +5,10 @@
 
 #define RPC_DISPATCH_TABLE_SIZE 4
 
+// XXX amolina
+#define RPC_BEEP_ID 0xD0
+#define RPC_KILL_ID 0xC1
+
 extern unsigned char rpc_cmd;
 extern unsigned char rpc_param;
 extern unsigned char rpc_in_progress;

@@ -11,10 +11,10 @@ unsigned int rpc_retval = 0;
 rpc_dispatch_table_entry rpc_dispatch_table[RPC_DISPATCH_TABLE_SIZE];
 
 void rpc_init (void) {
-    rpc_dispatch_table[0].id = 1;
+    rpc_dispatch_table[0].id = RPC_BEEP_ID;
     rpc_dispatch_table[0].fn = &rpc_beep;
 
-    rpc_dispatch_table[1].id = 66;
+    rpc_dispatch_table[1].id = RPC_KILL_ID;
     rpc_dispatch_table[1].fn = &rpc_kill;
 
     // XXX more RPCs
