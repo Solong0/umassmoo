@@ -17,11 +17,8 @@ void rpc_init (void) {
     rpc_dispatch_table[1].id = RPC_KILL_ID;
     rpc_dispatch_table[1].fn = &rpc_kill;
 
-    rpc_dispatch_table[2].id = RPC_UNKILL_ID;
-    rpc_dispatch_table[2].fn = &rpc_unkill;
-
-    rpc_dispatch_table[3].id = RPC_TEMPERATURE_ID;
-    rpc_dispatch_table[3].fn = &rpc_get_temperature;
+    rpc_dispatch_table[2].id = RPC_TEMPERATURE_ID;
+    rpc_dispatch_table[2].fn = &rpc_get_temperature;
 }
 
 void rpc_dispatch (void) {
@@ -64,10 +61,6 @@ unsigned int rpc_beep (void) {
 unsigned int rpc_kill (void) {
     return kill();
 };
-
-unsigned int rpc_unkill (void) {
-    return unkill();
-}
 
 unsigned int rpc_get_temperature (void) {
     // XXX copied from (sufficiently tested?) tests/sensorTest.c
