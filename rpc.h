@@ -32,5 +32,6 @@ void rpc_dispatch (void);
 unsigned int rpc_beep (void);
 unsigned int rpc_kill (void);
 unsigned int rpc_unkill (void);
+unsigned int rpc_get_temperature (void);
 
 #endif // RPC_H
