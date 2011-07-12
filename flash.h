@@ -17,6 +17,8 @@
 #define EXTFLASH_BYTE_READ_COMMAND 0x03
 #define EXTFLASH_WRITE_ENABLE_COMMAND 0x06
 
+extern unsigned char spi_iodata;
+
 unsigned char extflash_read_uchar (unsigned long);
 unsigned char extflash_write_uchar (unsigned long, unsigned char);
 void extflash_enable_chip (void);
