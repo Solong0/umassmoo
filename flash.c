@@ -40,7 +40,7 @@ void extflash_send_byte (unsigned char c) {
 }
 
 unsigned char extflash_read_uchar (unsigned long addr) {
-    unsigned char i, retval;
+    unsigned char i;
 
     extflash_enable_chip();
     extflash_send_byte(EXTFLASH_BYTE_READ_COMMAND);
@@ -53,7 +53,7 @@ unsigned char extflash_read_uchar (unsigned long addr) {
     // sync with the clock and busy-wait for USCIB1RX_ISR to fire
     extflash_send_byte(0);
     for (i = 5; i != 0; --i); // interrupt should be called in here
-    retval = spi_iodata;      // and ISR should have placed val in spi_iodata
+    // retval = spi_iodata;      // and ISR should have placed val in spi_iodata
 
     extflash_disable_chip();
 
