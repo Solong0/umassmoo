@@ -367,8 +367,10 @@ int main(void)
             } else {
               /* start the RPC; will stomp on protocol participation until it's
                * done */
-                rpc_in_progress = 1;
-                rpc_dispatch();
+                if (++rpc_in_progress > RPC_ALLOWABLE_RETRIES)
+                    rpc_in_progress = 0;
+                else
+                    rpc_dispatch();
                 handle_query(STATE_REPLY);
             }
 

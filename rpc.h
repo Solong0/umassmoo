@@ -5,6 +5,8 @@
 
 #define RPC_DISPATCH_TABLE_SIZE 3
 
+#define RPC_ALLOWABLE_RETRIES 10
+
 /* Function identifiers for RPC commands.  Each one-byte RPC_*_ID constant
  * corresponds to a byte value the reader sends via the cmd[] array.
  * XXX HACK: at the moment, Andres Molina provides these byte values based on
