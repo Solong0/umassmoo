@@ -19,3 +19,8 @@ unsigned char unkill (void) {
 unsigned char is_killed (void) {
   return (extflash_read_uchar(KILLSWITCH_ADDR) != 0);
 }
+
+void hard_reset (void) {
+    // per http://tech.groups.yahoo.com/group/msp430/message/49331
+    WDTCTL = 0;
+}

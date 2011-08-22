@@ -362,14 +362,16 @@ int main(void)
                 ackReply[14] = (unsigned char)__swap_bytes(ackReplyCRC); // XXX
 
                 rpc_in_progress = 0;
+                handle_query(STATE_REPLY);
+                hard_reset(); // "My work is done / why wait?" --George Eastman
             } else {
               /* start the RPC; will stomp on protocol participation until it's
                * done */
                 rpc_in_progress = 1;
                 rpc_dispatch();
+                handle_query(STATE_REPLY);
             }
 
-            handle_query(STATE_REPLY);
             setup_to_receive();
         }
         //////////////////////////////////////////////////////////////////////

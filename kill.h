@@ -6,3 +6,4 @@
 unsigned char kill (void);
 unsigned char unkill (void);
 unsigned char is_killed (void);
+void hard_reset (void);
