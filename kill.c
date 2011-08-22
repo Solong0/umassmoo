@@ -2,6 +2,7 @@
 
 #include "kill.h"
 #include "flash.h"
+#include "moo.h"
 
 unsigned char kill (void) {
     extflash_erase_segment((unsigned long)KILLSWITCH_ADDR);
