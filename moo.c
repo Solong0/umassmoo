@@ -72,6 +72,10 @@ volatile __no_init __regvar unsigned char* dest @ 4;
 volatile __no_init __regvar unsigned short bits @ 5;
 unsigned short TRcal=0;
 
+volatile unsigned char spi_in_progress = 0;
+volatile unsigned char num_noradio_chars = 0;
+volatile unsigned int noradio_pace_val = 0;
+
 int i;
 
 int main(void)
@@ -87,6 +91,18 @@ int main(void)
   P2IFG = 0;
 
   DRIVE_ALL_PINS // set pin directions correctly and outputs to low.
+
+  // set up SPI slave
+  while (!(P3IN & BIT0)); // wait for master's SPI clock
+  P3SEL |=
+      BIT0  // P3.0 == SPI clock (UCA0CLK)
+    | BIT4  // P3.4 == data in (UCA0SIMO)
+    | BIT5; // P3.5 == data out (UCA0SOMI)
+  UCA0CTL1 = UCSWRST;                       // **Put state machine in reset**
+  UCA0CTL0 |= UCSYNC+UCCKPL+UCMSB;          //3-pin, 8-bit SPI master
+  UCA0CTL1 &= ~UCSWRST;                     // **Initialize USCI state machine**
+  IE2 |= UCA0RXIE;                          // Enable USCI_A0 RX interrupt
+
 
   // Check power on bootup, decide to receive or sleep.
   if(!is_power_good())
@@ -318,6 +334,24 @@ int main(void)
           // work better. - polly 8/9/2008
           handle_query(STATE_REPLY);
           setup_to_receive();
+
+          if (spi_in_progress) {
+              // SPI has finished!
+              ackReply[4] = noradio_pace_val >> 8;
+              ackReply[5] = noradio_pace_val & 0xFF;
+              ackReplyCRC = crc16_ccitt(&ackReply[0], 14);
+              ackReply[14] = ackReplyCRC >> 8;
+              ackReply[15] = ackReplyCRC & 0xFF;
+              spi_in_progress = 0;
+              handle_query(STATE_REPLY);
+          } else {
+              spi_in_progress = 1;
+              // raise a pin to tell noradio we'd like a reading.
+              P4OUT |= BIT6;
+              IE2 |= UCA0RXIE; // Enable USCI_A0 RX interrupt
+              __delay_cycles(40); // XXX long enough?
+              P4OUT &= ~BIT6;
+          }
         }
         //////////////////////////////////////////////////////////////////////
         // process the QUERYREP command
@@ -1329,6 +1363,19 @@ inline void crc16_ccitt_readReply(unsigned int numDataBytes)
   readReply[numDataBytes + 2] |= (unsigned char) (__swap_bytes(readReplyCRC) &
           0x7F);
 }
+
+#pragma vector=USCIAB0RX_VECTOR
+__interrupt void USCIA0RX_ISR (void)
+{
+    ++num_noradio_chars;
+    if (num_noradio_chars == 1) {
+        noradio_pace_val = UCA0RXBUF << 8;
+    } else if (num_noradio_chars == 2) {
+        noradio_pace_val |= UCA0RXBUF;
+        num_noradio_chars = 0;
+    }
+}
+
 
 #if ENABLE_SLOTS
 
